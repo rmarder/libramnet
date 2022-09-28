@@ -1,0 +1,17 @@
+
+libramnet: ramnet.o
+	c++ -Os -std=c++11 -Wall -shared -o libramnet.so ramnet.o
+ramnet.o: ramnet.cpp ramnet.hpp
+	c++ -Os -std=c++11 -Wall -c ramnet.cpp -o ramnet.o
+clean:
+	rm -v libramnet.so ramnet.o
+
+install: libramnet.so ramnet.hpp
+	install -d $(PREFIX)/lib/
+	install -m 644 libramnet.so $(PREFIX)/lib/
+	install -d $(PREFIX)/include/
+	install -m 644 ramnet.hpp $(PREFIX)/include/
+
+uninstall: $(PREFIX)/lib/libramnet.so $(PREFIX)/include/ramnet.hpp
+	rm -v $(PREFIX)/lib/libramnet.so
+	rm -v $(PREFIX)/include/ramnet.hpp

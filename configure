@@ -1,0 +1,39 @@
+#!/bin/sh
+
+PREFIX="/usr/local"
+
+for i in "$@"; do
+  case $i in
+    -prefix=*|--prefix=*)
+      PREFIX="${i#*=}"
+      shift
+      ;;
+    --help)
+      HELP=YES
+      shift
+      ;;
+    -*|--*)
+      echo "Unknown option $i"
+      exit 1
+      ;;
+    *)
+      ;;
+  esac
+done
+
+if [ "$HELP" = YES  ]; then
+	echo "Usage: configure [OPTION...]"
+	echo ""
+	echo " Supported command options:"
+	echo ""
+	echo "  --prefix=PATH      install files in PREFIX [${PREFIX} by default]"
+	echo ""
+	echo "  --help             display this help text"
+	echo ""
+	exit 0
+fi
+
+echo "PREFIX := ${PREFIX}" > Makefile
+cat Makefile.in >> Makefile
+
+exit 0
