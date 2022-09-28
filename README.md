@@ -10,11 +10,11 @@ I have not checked if this library is thread safe, so you should assume it isn't
 
 This library collides with the C++ library namespace. You must not declare "using namespace std;" in any programs using this library.
 
-See the source code function prototypes and usage.
+See the source code for function prototypes and usage.
 
 This has no dependencies aside from the standard C++ library.
 Requires at least a C++11 compiler or better to build.
 
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
-To use, simply download and run ./configure && make && make install
+To use, simply git clone https://github.com/rmarder/libramnet and then ./configure && make && make install
