@@ -49,8 +49,6 @@ std::string trim(const std::string &str, const std::string &whitespace = " \n\r\
 bool str_contains(const std::string &haystack, const std::string &needle);
 std::string strrev(std::string str);
 std::string str_rot13(const std::string &str);
-std::string str_rot13(const std::string &str);
-std::string str_rot13(const std::string &str);
 std::string str_repeat(const std::string &str, const size_t times);
 std::string str_pad(const std::string &input, size_t length, const std::string pad_str = " ", size_t pad_type = STR_PAD_RIGHT);
 std::string ucfirst(std::string str);
@@ -63,7 +61,17 @@ std::vector<std::string> str_split(const std::string &str, size_t length = 1);
 std::string implode(const std::string &separator, const std::vector<std::string> &array);
 
 // network functions
-std::string dnslookup(const std::string &input);
+std::string __gethostbyname(const std::string &input);
+
+
+// here we redefine functions that collide with the global C namespace used inside the library
+// the library can't see these definitions, this is only for the benefit of library users.
+#ifndef _RAMNET_C_
+
+// network functions
+constexpr auto gethostbyname = ramnet::__gethostbyname;
+
+#endif
 
 }
 
