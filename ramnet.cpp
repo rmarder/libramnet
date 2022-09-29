@@ -347,7 +347,7 @@ std::string implode(const std::string &separator, const std::vector<std::string>
 
 // performs a dns lookup on input and returns an IP address
 // returns input unmodified on failure.
-std::string dnslookup(const std::string &input)
+std::string __gethostbyname(const std::string &input)
 {
 	struct hostent *h = gethostbyname(input.c_str());
 	struct in_addr a;
@@ -370,6 +370,6 @@ std::string dnslookup(const std::string &input)
 	return input;
 }
 
-}
+} // end of namespace
 
 #endif
