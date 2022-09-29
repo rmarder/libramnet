@@ -68,9 +68,35 @@ void test_net()
 	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
+void test_base64()
+{
+	std::string testdata;
+	std::string encoded;
+	std::string decoded;
+	std::string control;
+
+	std::cout << "Testing base64_encode...";
+	control = "PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGhlYWQ+PHRpdGxlPkV4YW1wbGUgRG9tYWluPC90aXRsZT48bWV0YSBjaGFyc2V0PSJ1dGYtOCIgLz48bWV0YSBodHRwLWVxdWl2PSJDb250ZW50LXR5cGUiIGNvbnRlbnQ9InRleHQvaHRtbDsgY2hhcnNldD11dGYtOCIgLz48bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEiIC8+PHN0eWxlIHR5cGU9InRleHQvY3NzIj5ib2R5IHtiYWNrZ3JvdW5kLWNvbG9yOiAjZjBmMGYyO21hcmdpbjogMDtwYWRkaW5nOiAwO2ZvbnQtZmFtaWx5OiAtYXBwbGUtc3lzdGVtLCBzeXN0ZW0tdWksIEJsaW5rTWFjU3lzdGVtRm9udCwgIlNlZ29lIFVJIiwgIk9wZW4gU2FucyIsICJIZWx2ZXRpY2EgTmV1ZSIsIEhlbHZldGljYSwgQXJpYWwsIHNhbnMtc2VyaWY7fQ==";
+	testdata = "<!doctype html><html><head><title>Example Domain</title><meta charset=\"utf-8\" /><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\" /><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /><style type=\"text/css\">body {background-color: #f0f0f2;margin: 0;padding: 0;font-family: -apple-system, system-ui, BlinkMacSystemFont, \"Segoe UI\", \"Open Sans\", \"Helvetica Neue\", Helvetica, Arial, sans-serif;}";
+	assert(base64_encode(testdata) == control);
+	std::cout << "\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing base64_decode...";
+	assert(base64_decode(control) == testdata);
+	std::cout << "\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing base64 with binary data...";
+	testdata = file_get_contents("/bin/sh");
+	encoded = base64_encode(testdata);
+	decoded = base64_decode(encoded);
+	assert(decoded == testdata);
+	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+}
+
 int main(void)
 {
 	test_trim();
 	test_net();
+	test_base64();
 	return 0;
 }
