@@ -3,6 +3,14 @@ libramnet: ramnet.o
 	c++ -Os -std=c++11 -Wall -shared -o libramnet.so ramnet.o
 ramnet.o: ramnet.cpp ramnet.hpp
 	c++ -Os -std=c++11 -Wall -c ramnet.cpp -o ramnet.o
+
+test: libramnet.so test.o
+	c++ -Os test.o -std=c++11 -Wall -L. -lramnet -o test -Wl,-rpath,.
+	./test
+	rm -v test test.o
+test.o: test.cpp
+	c++ -Os -std=c++11 -Wall -c test.cpp -o test.o
+
 clean:
 	rm -v libramnet.so ramnet.o
 
