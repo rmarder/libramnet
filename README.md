@@ -18,6 +18,8 @@ Requires [libcurl] built with HTTP support against an ssl/tls library such as Op
 
 Requires [json] JSON for Modern C++, which is bundled in this project.
 
+Requires [base64] base64 encoding and decoding with c++, which is bundled in this project.
+
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
 To use, simply do:
@@ -28,3 +30,4 @@ git clone https://github.com/rmarder/libramnet
 
 [libcurl]: <https://curl.se/libcurl/>
 [json]: <https://github.com/nlohmann/json/>
+[base64]: <https://github.com/ReneNyffenegger/cpp-base64>
