@@ -20,6 +20,8 @@
 #ifndef _RAMNET_H_
 #define _RAMNET_H_
 
+#define _POSIX_C_SOURCE 200809L
+
 #include <string>
 #include <climits>
 #include <vector>
