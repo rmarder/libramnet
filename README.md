@@ -8,8 +8,6 @@ This is a procedural C-style library. There are no classes or objects here.
 
 I have not checked if this library is thread safe, so you should assume it isn't.
 
-This library collides with the C++ library namespace. You must not declare "using namespace std;" in any programs using this library.
-
 See the source code for function prototypes and usage.
 
 This has no dependencies aside from the standard C++ library.
