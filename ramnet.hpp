@@ -62,7 +62,7 @@ std::string implode(const std::string &separator, const std::vector<std::string>
 
 // network functions
 std::string __gethostbyname(const std::string &input);
-
+std::string url_get_contents(const std::string &input);
 
 // here we redefine functions that collide with the global C namespace used inside the library
 // the library can't see these definitions, this is only for the benefit of library users.
