@@ -16,5 +16,7 @@ Requires at least a C++11 compiler or better to build.
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
 To use, simply do:
+
 git clone https://github.com/rmarder/libramnet
+
 ./configure && make && make test && make install
