@@ -37,9 +37,71 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+// this can be found in "apk add curl-dev"
+#include <curl/curl.h>
+
 // most of the functions in this library mirror the useful functions contained in the PHP standard library.
 
 namespace ramnet {
+
+/**************
+ * curl stuff *
+***************
+*/
+struct http
+{
+	long status;
+	std::string body;
+};
+
+static size_t CURL_WriteCallback(const void *contents, const size_t size, const size_t nmemb, const void *userp)
+{
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	return size * nmemb;
+}
+
+http http_fetch(const std::string url)
+{
+	CURL *curl;
+	CURLcode res;
+	std::string read_buffer;
+	long response_code;
+	http result;
+
+	// default result returned on failure
+	result.body = "";
+	result.status = 499;
+
+	curl = curl_easy_init();
+	if(curl)
+	{
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CURL_WriteCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
+		res = curl_easy_perform(curl);
+		if(res == CURLE_OK)
+		{
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+		}
+		else
+		{
+			std::cerr << "CURL failure. terminating..." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		result.body = read_buffer;
+		result.status = response_code;
+		curl_easy_cleanup(curl);
+	}
+	else
+	{
+		std::cerr << "CURL failure. terminating..." << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return result;
+}
+
 
 /******************/
 /* math functions */
@@ -368,6 +430,23 @@ std::string __gethostbyname(const std::string &input)
 		}
 	}
 	return input;
+}
+
+// similar to file_get_contents, but for the network
+// returns empty string on failure
+std::string url_get_contents(const std::string &input)
+{
+	if(input.substr(0, 7) == "http://" || input.substr(0, 8) == "https://")
+	{
+		http fetch = http_fetch(input);
+
+		if(fetch.status != 200)
+		{
+			return "";
+		}
+		return fetch.body;
+	}
+	return "";
 }
 
 } // end of namespace
