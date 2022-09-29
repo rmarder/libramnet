@@ -20,9 +20,26 @@
 #ifndef _RAMNET_C_
 #define _RAMNET_C_
 
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <cctype>
+#include <climits>
+#include <vector>
+#include <sstream>
+#include <utility>
+#include <cstdlib>
+#include <cstring>
+
+#include <netdb.h>
+#include <arpa/inet.h>
+
 #include "ramnet.hpp"
 
 // most of the functions in this library mirror the useful functions contained in the PHP standard library.
+
+namespace ramnet {
 
 /******************/
 /* math functions */
@@ -321,6 +338,38 @@ std::string implode(const std::string &separator, const std::vector<std::string>
 		}
 	}
 	return result;
+}
+
+/*********************
+ * Network functions *
+ *********************
+*/
+
+// performs a dns lookup on input and returns an IP address
+// returns input unmodified on failure.
+std::string dnslookup(const std::string &input)
+{
+	struct hostent *h = gethostbyname(input.c_str());
+	struct in_addr a;
+	if(h == NULL)
+	{
+		//herror("gethostbyname");
+		return input;
+	}
+	if(h->h_addrtype == AF_INET)
+	{
+		//printf("name: %s\n", h->h_name);
+		//while(*h->h_aliases) printf("alias: %s\n", *h->h_aliases++);
+		while(*h->h_addr_list)
+		{
+			memmove((char *) &a, *h->h_addr_list++, sizeof(a));
+			//printf("address: %s\n", inet_ntoa(a));
+			return inet_ntoa(a);
+		}
+	}
+	return input;
+}
+
 }
 
 #endif
