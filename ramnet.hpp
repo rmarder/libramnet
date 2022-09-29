@@ -69,7 +69,7 @@ std::string __gethostbyname(const std::string &input);
 #ifndef _RAMNET_C_
 
 // network functions
-constexpr auto gethostbyname = ramnet::__gethostbyname;
+constexpr auto& gethostbyname = ramnet::__gethostbyname;
 
 #endif
 
