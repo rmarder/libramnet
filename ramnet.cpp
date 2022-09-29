@@ -20,6 +20,8 @@
 #ifndef _RAMNET_C_
 #define _RAMNET_C_
 
+#include "ramnet.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -34,8 +36,6 @@
 
 #include <netdb.h>
 #include <arpa/inet.h>
-
-#include "ramnet.hpp"
 
 // most of the functions in this library mirror the useful functions contained in the PHP standard library.
 
