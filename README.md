@@ -12,6 +12,7 @@ See the source code for function prototypes and usage.
 
 This has no dependencies aside from the standard C++ library.
 Requires at least a C++11 compiler or better to build.
+Also requires a POSIX compliant system. We currently define _POSIX_C_SOURCE 200809L
 
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
