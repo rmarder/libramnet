@@ -20,16 +20,11 @@
 #ifndef _RAMNET_H_
 #define _RAMNET_H_
 
-#include <fstream>
-#include <iostream>
 #include <string>
-#include <algorithm>
-#include <cctype>
 #include <climits>
 #include <vector>
-#include <sstream>
-#include <utility>
-#include <cstdlib>
+
+namespace ramnet {
 
 // php constants
 // these can be set to anything as long as they are unique
@@ -65,5 +60,9 @@ std::vector<std::string> explode(std::string const &search, std::string const &s
 std::vector<std::string> str_split(const std::string &str, size_t length = 1);
 std::string implode(const std::string &separator, const std::vector<std::string> &array);
 
-#endif
+// network functions
+std::string dnslookup(const std::string &input);
 
+}
+
+#endif
