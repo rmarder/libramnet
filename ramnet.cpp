@@ -40,6 +40,10 @@
 // this can be found in "apk add curl-dev"
 #include <curl/curl.h>
 
+// https://github.com/nlohmann/json/releases
+#include "json.hpp"
+using json = nlohmann::json;
+
 // most of the functions in this library mirror the useful functions contained in the PHP standard library.
 
 namespace ramnet {
