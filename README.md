@@ -10,11 +10,11 @@ I have not checked if this library is thread safe, so you should assume it isn't
 
 See the source code for function prototypes and usage.
 
-This has no dependencies aside from the standard C++ library and POSIX.
-
 Requires at least a C++11 compiler or better to build.
 
 Requires a POSIX compliant system. We currently define _POSIX_C_SOURCE 200809L
+
+Requires [libcurl] built with HTTP support against an ssl/tls library such as OpenSSL.
 
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
@@ -23,3 +23,5 @@ To use, simply do:
 git clone https://github.com/rmarder/libramnet
 
 ./configure && make && make test && make install
+
+[libcurl]: <https://curl.se/libcurl/>
