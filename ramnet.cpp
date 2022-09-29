@@ -124,11 +124,6 @@ std::string __base64_encode(const std::string &str)
 	return base64_encode(str);
 }
 
-std::string __base64_encode_url(const std::string &str)
-{
-	return base64_encode(str, true);
-}
-
 std::string __base64_decode(const std::string &str)
 {
 	return base64_decode(str);
