@@ -48,10 +48,13 @@ using json = nlohmann::json;
 
 namespace ramnet {
 
-/**************
- * curl stuff *
-***************
+/***********************
+ * internal curl stuff *
+************************
 */
+
+namespace {
+
 struct http
 {
 	long status;
@@ -106,6 +109,7 @@ http http_fetch(const std::string url)
 	return result;
 }
 
+} // end anonymous namespace
 
 /******************/
 /* math functions */
@@ -291,55 +295,56 @@ std::string str_replace(const std::string &search, const std::string &replace, c
 * array functions *
 *******************
 */
-namespace
+namespace {
+
+// explode implementation helper. we don't want people caling this, thus the anonymous namespace.
+// given a search delimited string subject, return the segment requested.
+// eg:  _explode_segment("||", "this||is||a||string", result, 2) // result == "a"
+// if segment was found return true, if segment was not found return false
+bool _explode_segment(const std::string &search, const std::string &subject, std::string &result, size_t segment = 0)
 {
-	// explode implementation helper. we don't want people caling this, thus the anonymous namespace.
-	// given a search delimited string subject, return the segment requested.
-	// eg:  _explode_segment("||", "this||is||a||string", result, 2) // result == "a"
-	// if segment was found return true, if segment was not found return false
-	bool _explode_segment(const std::string &search, const std::string &subject, std::string &result, size_t segment = 0)
+	//std::string result;
+	std::string looptest;
+	size_t found_segment;
+
+	// segment 0 is a special case because we won't find search immediately before it.
+	// instead, just return from the start of string until we encounter search, not including search itself.
+	if(segment == 0)
 	{
-		//std::string result;
-		std::string looptest;
-		size_t found_segment;
-
-		// segment 0 is a special case because we won't find search immediately before it.
-		// instead, just return from the start of string until we encounter search, not including search itself.
-		if(segment == 0)
-		{
-			found_segment = subject.find(search, 0);
-			result = subject.substr(0, found_segment);
-			//std::cout << "found segment: 0 " << " result: " << result << std::endl;
-			// we have a good result
-			return true;
-		}
-
-		found_segment = 0;
-		result = "";
-
-		// loop until we find the segment we want
-		for(size_t i = 0; i < subject.size(); i++)
-		{
-			// have we found a segment?
-			if(subject.substr(i, search.size()) == search)
-			{
-				found_segment++;
-				result = subject.substr(i + search.size(), std::string::npos);
-				//std::cout << "found segment: [" << result << "] | ";
-				result = result.substr(0, result.find(search, 0));
-				//std::cout << "found segment: [" << result << "]" << std::endl;
-				if(found_segment == segment)
-				{
-					// we have a good result.
-					return true;
-				}
-				i = i + search.size() - 1;
-			}
-		}
-		// we didn't find any segments. signal to caller that result is garbage.
-		return false;
+		found_segment = subject.find(search, 0);
+		result = subject.substr(0, found_segment);
+		//std::cout << "found segment: 0 " << " result: " << result << std::endl;
+		// we have a good result
+		return true;
 	}
+
+	found_segment = 0;
+	result = "";
+
+	// loop until we find the segment we want
+	for(size_t i = 0; i < subject.size(); i++)
+	{
+		// have we found a segment?
+		if(subject.substr(i, search.size()) == search)
+		{
+			found_segment++;
+			result = subject.substr(i + search.size(), std::string::npos);
+			//std::cout << "found segment: [" << result << "] | ";
+			result = result.substr(0, result.find(search, 0));
+			//std::cout << "found segment: [" << result << "]" << std::endl;
+			if(found_segment == segment)
+			{
+				// we have a good result.
+				return true;
+			}
+			i = i + search.size() - 1;
+		}
+	}
+	// we didn't find any segments. signal to caller that result is garbage.
+	return false;
 }
+
+} //end anonymous namespace
 
 // This does not handle limit like php's explode() does.
 // 1) Negative limit is undefined behavior.
