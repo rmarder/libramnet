@@ -6,7 +6,7 @@ so if you are familiar with that you will feel right at home using this library.
 
 This is a procedural C-style library. There are no classes or objects here.
 
-I have not checked if this library is thread safe, so you should assume it isn't.
+This library is not thread safe. You have been warned.
 
 See the source code for function prototypes and usage.
 
