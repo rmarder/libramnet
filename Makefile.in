@@ -6,7 +6,7 @@ ramnet.o: ramnet.cpp ramnet.hpp
 
 test: libramnet.so test.o
 	c++ -Os test.o -std=c++11 -Wall -L. -lramnet -o test -Wl,-rpath,.
-	./test
+	./test || (echo "[\033[1;31mTEST SUITE FAILED\033[0m]"; sh -c 'exit 1')
 	rm -v test test.o
 test.o: test.cpp
 	c++ -Os -std=c++11 -Wall -c test.cpp -o test.o
