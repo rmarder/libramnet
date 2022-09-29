@@ -44,6 +44,9 @@
 #include "json.hpp"
 using json = nlohmann::json;
 
+// this is deliberate, we want to build base64.cpp and base64.h directly into libramnet
+#include "base64.cpp"
+
 // most of the functions in this library mirror the useful functions contained in the PHP standard library.
 
 namespace ramnet {
@@ -110,6 +113,26 @@ http http_fetch(const std::string url)
 }
 
 } // end anonymous namespace
+
+/****************
+ * base64 stuff *
+ ****************
+*/
+
+std::string __base64_encode(const std::string &str)
+{
+	return base64_encode(str);
+}
+
+std::string __base64_encode_url(const std::string &str)
+{
+	return base64_encode(str, true);
+}
+
+std::string __base64_decode(const std::string &str)
+{
+	return base64_decode(str);
+}
 
 /******************/
 /* math functions */
