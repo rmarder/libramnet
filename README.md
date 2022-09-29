@@ -16,6 +16,8 @@ Requires a POSIX compliant system. We currently define _POSIX_C_SOURCE 200809L
 
 Requires [libcurl] built with HTTP support against an ssl/tls library such as OpenSSL.
 
+Requires [json] JSON for Modern C++, which is bundled in this project.
+
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
 To use, simply do:
@@ -25,3 +27,4 @@ git clone https://github.com/rmarder/libramnet
 ./configure && make && make test && make install
 
 [libcurl]: <https://curl.se/libcurl/>
+[json]: <https://github.com/nlohmann/json/>
