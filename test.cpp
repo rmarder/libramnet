@@ -58,6 +58,14 @@ void test_net()
 	std::cout << "Tesing gethostbyname() on localhost...";
 	assert(gethostbyname("localhost") != "localhost");
 	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Tesing url_get_contents() on http://www.example.com...";
+	assert(url_get_contents("http://www.example.com") != "");
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Tesing url_get_contents() on https://www.example.com...";
+	assert(url_get_contents("https://www.example.com") != "");
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
 int main(void)
