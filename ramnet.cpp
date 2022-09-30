@@ -41,10 +41,6 @@
 // this can be found in "apk add curl-dev"
 #include <curl/curl.h>
 
-// https://github.com/nlohmann/json/releases
-#include "json.hpp"
-using json = nlohmann::json;
-
 // this is deliberate, we want to build base64.cpp and base64.h directly into libramnet
 #include "base64.cpp"
 
