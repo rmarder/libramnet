@@ -68,6 +68,9 @@ std::string url_get_contents(const std::string &input);
 std::string __base64_decode(const std::string &str);
 std::string __base64_encode(const std::string &str);
 
+// misc functions
+unsigned int __sleep(unsigned int seconds);
+
 // here we redefine functions that collide with the global C namespace used inside the library
 // the library can't see these definitions, this is only for the benefit of library users.
 #ifndef _RAMNET_C_
@@ -78,6 +81,9 @@ constexpr auto& gethostbyname = ramnet::__gethostbyname;
 // base64 functions
 constexpr auto& base64_decode = ramnet::__base64_decode;
 constexpr auto& base64_encode = ramnet::__base64_encode;
+
+// misc functions
+constexpr auto& sleep = ramnet::__sleep;
 
 #endif
 
