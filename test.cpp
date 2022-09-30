@@ -93,10 +93,18 @@ void test_base64()
 	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
+void test_misc()
+{
+	std::cout << "Testing sleep()...";
+	assert(sleep(1) == 0);
+	std::cout << "\t\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+}
+
 int main(void)
 {
 	test_trim();
 	test_net();
 	test_base64();
+	test_misc();
 	return 0;
 }
