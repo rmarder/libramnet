@@ -476,9 +476,18 @@ unsigned int __sleep(unsigned int seconds)
 	return sleep(seconds);
 }
 
-void __unlink(const std::string &file)
+// returns true if file was successfully removed (or never existed), false otherwise
+bool __unlink(const std::string &file)
 {
-	std::remove(file.c_str());
+	if(file_exists(file) == true)
+	{
+		std::remove(file.c_str());
+	}
+	if(file_exists(file) == true)
+	{
+		return false;
+	}
+	return true;
 }
 
 std::string file_get_contents(const std::string &str)
