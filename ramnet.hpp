@@ -34,13 +34,11 @@ namespace ramnet {
 const size_t STR_PAD_RIGHT = 1;
 const size_t STR_PAD_LEFT = 2;
 const size_t STR_PAD_BOTH = 3;
+const size_t FILE_APPEND = 8;
 
 // math functions
 int rand(const int min = 0, const int max = RAND_MAX);
 bool is_int(const std::string &str);
-
-// filesystem functions
-std::string file_get_contents(const std::string &str);
 
 // string functions
 std::string ltrim(const std::string &str, const std::string &whitespace = " \n\r\t\f\v");
@@ -70,6 +68,12 @@ std::string __base64_encode(const std::string &str);
 
 // misc functions
 unsigned int __sleep(unsigned int seconds);
+std::string file_get_contents(const std::string &str);
+size_t file_put_contents(const std::string &file, const std::string &data, size_t flag = 0);
+void __unlink(const std::string &file);
+bool file_exists(const std::string &str);
+bool is_readable(const std::string &str);
+bool is_writable(const std::string &str);
 
 // here we redefine functions that collide with the global C namespace used inside the library
 // the library can't see these definitions, this is only for the benefit of library users.
@@ -84,6 +88,7 @@ constexpr auto& base64_encode = ramnet::__base64_encode;
 
 // misc functions
 constexpr auto& sleep = ramnet::__sleep;
+constexpr auto& unlink = ramnet::__unlink;
 
 #endif
 
