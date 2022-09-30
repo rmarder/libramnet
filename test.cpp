@@ -98,6 +98,23 @@ void test_misc()
 	std::cout << "Testing sleep()...";
 	assert(sleep(1) == 0);
 	std::cout << "\t\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing file_put_contents() new file...";
+	assert(file_put_contents("test.tmp", "test line\n") > 0);
+	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing file_put_contents() append file...";
+	assert(file_put_contents("test.tmp", "second line\n", FILE_APPEND) > 0);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing file_get_contents() ...";
+	assert(file_get_contents("test.tmp") == "test line\nsecond line\n");
+	std::cout << "\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing file_put_contents() overwrite file...";
+	assert(file_put_contents("test.tmp", "test") > 0);
+	assert(file_get_contents("test.tmp") == "test");
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
 int main(void)
