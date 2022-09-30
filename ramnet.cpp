@@ -89,6 +89,9 @@ http http_fetch(const std::string url)
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30L); // 30 seconds
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); // follow redirects
+		curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L); // follow up to 10 redirects
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CURL_WriteCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
 		res = curl_easy_perform(curl);
