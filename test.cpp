@@ -99,6 +99,18 @@ void test_misc()
 	assert(sleep(1) == 0);
 	std::cout << "\t\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 
+	std::cout << "Testing file_exists() on nonexisting file...";
+	assert(file_exists("test.tmp") == false);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing is_readable() on nonexisting file...";
+	assert(is_readable("test.tmp") == false);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing is_writable() on nonexisting file...";
+	assert(is_writable("test.tmp") == false);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
 	std::cout << "Testing file_put_contents() new file...";
 	assert(file_put_contents("test.tmp", "test line\n") > 0);
 	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
@@ -115,6 +127,26 @@ void test_misc()
 	assert(file_put_contents("test.tmp", "test") > 0);
 	assert(file_get_contents("test.tmp") == "test");
 	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing file_exists() on existing file...";
+	assert(file_exists("test.tmp") == true);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing is_readable() on existing file...";
+	assert(is_readable("test.tmp") == true);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing is_writable() on existing file...";
+	assert(is_writable("test.tmp") == true);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing unlink() on existing file...";
+	assert(unlink("test.tmp") == true);
+	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing unlink() on nonexisting file...";
+	assert(unlink("test.tmp") == true);
+	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
 int main(void)
