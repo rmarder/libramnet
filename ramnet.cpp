@@ -153,20 +153,6 @@ bool is_int(const std::string &str)
 	return false;
 }
 
-std::string file_get_contents(const std::string &str)
-{
-	std::ifstream file;
-	file.open(str, std::ios::in);
-	if(!file.is_open())
-	{
-		return "";
-	}
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	file.close();
-	return buffer.str();
-}
-
 std::string ltrim(const std::string &str, const std::string &whitespace /* = " \n\r\t\f\v" */)
 {
 	size_t start = str.find_first_not_of(whitespace);
@@ -487,6 +473,74 @@ unsigned int __sleep(unsigned int seconds)
 	return sleep(seconds);
 }
 
-} // end of namespace
+void __unlink(const std::string &file)
+{
+	std::remove(file.c_str());
+}
 
+std::string file_get_contents(const std::string &str)
+{
+	std::ifstream file;
+	file.open(str, std::ios::in | std::ios::binary);
+	if(!file.is_open())
+	{
+		return "";
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	file.close();
+	return buffer.str();
+}
+
+// this should return the number of bytes written, but it doesn't.
+// instead we return 0 if nothing was written, or strlen(data) if we wrote anything
+size_t file_put_contents(const std::string &str, const std::string &data, size_t flag /* = 0 */)
+{
+	std::ofstream file;
+	if(flag == 0)
+	{
+		std::remove(str.c_str());
+		file.open(str, std::ios::out | std::ios::binary);
+	}
+	if(flag == FILE_APPEND)
+	{
+		file.open(str, std::ios::out | std::ios::binary | std::ios::app);
+	}
+	if(!file.is_open())
+	{
+		return 0;
+	}
+	file << data;
+	file.close();
+	return data.length();
+}
+
+bool file_exists(const std::string &str)
+{
+	if(access(str.c_str(), F_OK) == 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool is_readable(const std::string &str)
+{
+	if(access(str.c_str(), R_OK) == 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool is_writable(const std::string &str)
+{
+	if(access(str.c_str(), W_OK) == 0)
+	{
+		return true;
+	}
+	return false;
+}
+
+} // end of namespace
 #endif
