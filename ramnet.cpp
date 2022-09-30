@@ -36,6 +36,7 @@
 
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 // this can be found in "apk add curl-dev"
 #include <curl/curl.h>
@@ -474,6 +475,16 @@ std::string url_get_contents(const std::string &input)
 		return fetch.body;
 	}
 	return "";
+}
+
+/******************
+ * misc functions *
+ ******************
+*/
+
+unsigned int __sleep(unsigned int seconds)
+{
+	return sleep(seconds);
 }
 
 } // end of namespace
