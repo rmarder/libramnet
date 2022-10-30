@@ -178,7 +178,7 @@ int popen2(const char *cmdline, struct popen2 *childinfo)
 
 // simple wrapper around popen2()
 // ensures process terminatation after timeout seconds. timeout 0 runs forever.
-std::string shell_exec(const std::string cmd, const std::string input, int &status, int timeout)
+std::string shell_exec(const std::string &cmd, const std::string &input, int &status, int timeout)
 {
 	char buf[8192];
 	struct popen2 kid;
@@ -226,20 +226,20 @@ std::string shell_exec(const std::string cmd, const std::string input, int &stat
 }
 
 // alternative way of calling shell_exec() with fewer arguments
-std::string shell_exec(const std::string cmd, const std::string input, int &status)
+std::string shell_exec(const std::string &cmd, const std::string &input, int &status)
 {
 	return shell_exec(cmd, input, status, 0);
 }
 
 // alternative way of calling shell_exec() with fewer arguments
-std::string shell_exec(const std::string cmd, const std::string input)
+std::string shell_exec(const std::string &cmd, const std::string &input)
 {
 	int status;
 	return shell_exec(cmd, input, status);
 }
 
 // alternative way of calling shell_exec() with fewer arguments
-std::string shell_exec(const std::string cmd)
+std::string shell_exec(const std::string &cmd)
 {
 	return shell_exec(cmd, "");
 }
@@ -578,6 +578,109 @@ std::string url_get_contents(const std::string &input)
 		return fetch.body;
 	}
 	return "";
+}
+
+// open tcp socket connection to hostname on port
+// returns a socket fd, or -1 on failure
+int sopen(const std::string &hostname, int port)
+{
+	int sock;
+	struct sockaddr_in serv_addr;
+	struct timeval timeout;
+	sock = 0;
+
+	std::string host = __gethostbyname(hostname);
+	if(host == "")
+	{
+		std::cerr << "hostname lookup failure!" << std::endl;
+		return -1;
+	}
+	//std::cerr << "gethostbyname: " << host << std::endl;
+
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if(sock < 0)
+	{
+		std::cerr << "socket creation failed!" << std::endl;
+		return -1;
+	}
+
+	// timeout after 10 minutes
+	timeout.tv_sec = 600;
+	timeout.tv_usec = 0;
+
+	if(setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0
+	|| setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0)
+	{
+		std::cerr << "setsockopt failed!" << std::endl;
+	}
+
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(port);
+
+	// Convert IPv4 and IPv6 addresses from text to binary form
+	if(inet_pton(AF_INET, host.c_str(), &serv_addr.sin_addr) <= 0)
+	{
+		std::cerr << "invalid address!" << std::endl;
+		return -1;
+	}
+
+	if(connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+	{
+		std::cerr << "connection failed!" << std::endl;
+		return -1;
+	}
+	return sock;
+}
+
+// read a line from socket and return it.
+std::string read_line(int sock)
+{
+	char tmp[1];
+	char buf[8192];
+
+	for(int i = 0; i < 8192; i++)
+	{
+		if(read(sock, tmp, 1) != 1)
+		{
+			std::cerr << "socket failure. read failed." << std::endl;
+			return "";
+		}
+		buf[i] = tmp[0];
+		if(tmp[0] == '\n' || tmp[0] == '\r')
+		{
+			// do not break if the first byte we read is a newline character.
+			// this prevents returning an empty string for no good reason.
+			if(i > 0)
+			{
+				buf[i] = '\0';
+				break;
+			}
+		}
+	}
+	std::string result = buf;
+	return trim(result);
+}
+
+// returns true on success, false on failure
+bool write_line(int sock, const std::string &line)
+{
+	if(write(sock, line.c_str(), line.length()) != (ssize_t)line.length())
+	{
+		std::cerr << "socket failure. write failed." << std::endl;
+		return false;
+	}
+	if(write(sock, "\r\n", 2) != 2)
+	{
+		std::cerr << "socket failure. write failed." << std::endl;
+		return false;
+	}
+	return true;
+}
+
+// close socket
+void __close(int sock)
+{
+	close(sock);
 }
 
 /************************
