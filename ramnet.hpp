@@ -66,14 +66,22 @@ std::string url_get_contents(const std::string &input);
 std::string __base64_decode(const std::string &str);
 std::string __base64_encode(const std::string &str);
 
-// misc functions
-unsigned int __sleep(unsigned int seconds);
+// process functions
+std::string shell_exec(const std::string cmd, const std::string input, int &status, int timeout);
+std::string shell_exec(const std::string cmd, const std::string input, int &status);
+std::string shell_exec(const std::string cmd, const std::string input);
+std::string shell_exec(const std::string cmd);
+
+// filesystem functions
 std::string file_get_contents(const std::string &str);
 size_t file_put_contents(const std::string &file, const std::string &data, size_t flag = 0);
 bool __unlink(const std::string &file);
 bool file_exists(const std::string &str);
 bool is_readable(const std::string &str);
 bool is_writable(const std::string &str);
+
+// misc functions
+unsigned int __sleep(unsigned int seconds);
 
 // here we redefine functions that collide with the global C namespace used inside the library
 // the library can't see these definitions, this is only for the benefit of library users.
