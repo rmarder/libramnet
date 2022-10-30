@@ -61,16 +61,20 @@ std::string implode(const std::string &separator, const std::vector<std::string>
 // network functions
 std::string __gethostbyname(const std::string &input);
 std::string url_get_contents(const std::string &input);
+int sopen(const std::string &hostname, int port);
+std::string read_line(int sock);
+bool write_line(int sock, const std::string &line);
+void __close(int sock);
 
 // base64 functions
 std::string __base64_decode(const std::string &str);
 std::string __base64_encode(const std::string &str);
 
 // process functions
-std::string shell_exec(const std::string cmd, const std::string input, int &status, int timeout);
-std::string shell_exec(const std::string cmd, const std::string input, int &status);
-std::string shell_exec(const std::string cmd, const std::string input);
-std::string shell_exec(const std::string cmd);
+std::string shell_exec(const std::string &cmd, const std::string &input, int &status, int timeout);
+std::string shell_exec(const std::string &cmd, const std::string &input, int &status);
+std::string shell_exec(const std::string &cmd, const std::string &input);
+std::string shell_exec(const std::string &cmd);
 
 // filesystem functions
 std::string file_get_contents(const std::string &str);
@@ -89,6 +93,7 @@ unsigned int __sleep(unsigned int seconds);
 
 // network functions
 constexpr auto& gethostbyname = ramnet::__gethostbyname;
+constexpr auto& close = ramnet::__close;
 
 // base64 functions
 constexpr auto& base64_decode = ramnet::__base64_decode;
