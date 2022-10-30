@@ -66,6 +66,21 @@ void test_net()
 	std::cout << "Tesing url_get_contents() on https://www.example.com...";
 	assert(url_get_contents("https://www.example.com") != "");
 	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing sopen() on www.example.com port 80...";
+	int sock = -1;
+	sock = sopen("www.example.com", 80);
+	assert(sock != -1);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing write_line() on www.example.com port 80...";
+	assert(write_line(sock, "HEAD / HTTP/1.0\r\nHost: www.example.com\r\n\r\n") != false);
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing read_line() on www.example.com port 80...";
+	assert(read_line(sock) == "HTTP/1.0 200 OK");
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+	close(sock);
 }
 
 void test_base64()
