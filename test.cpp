@@ -93,12 +93,54 @@ void test_base64()
 	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
-void test_misc()
+void test_process()
 {
-	std::cout << "Testing sleep()...";
-	assert(sleep(1) == 0);
-	std::cout << "\t\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+	std::string cmd;
+	std::string input;
+	std::string output;
+	int status;
 
+	std::cout << "Testing shell_exec() on script ./test.sh...";
+	cmd = "/bin/sh ./test.sh";
+	input = "hello world";
+	output = "";
+	status = -1;
+	output = shell_exec(cmd, input, status);
+	assert(output == "hello world");
+	assert(status == 5);
+	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing shell_exec() with stdin and stdout on process tr...";
+	cmd = "tr a-z A-Z";
+	input = "hello world";
+	output = "";
+	status = -1;
+	output = shell_exec(cmd, input, status);
+	assert(output == "HELLO WORLD");
+	assert(status == 0);
+	std::cout << "\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing shell_exec() on process ping using timeout...";
+	cmd = "ping localhost";
+	input = "";
+	output = "";
+	status = -1;
+	output = shell_exec(cmd, input, status, 1);
+	assert(status == 0);
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing shell_exec() on process that doesn't exist...";
+	cmd = "strjrdthytbytdtydjdytytfyytjuyjkfyj5ejur5";
+	input = "";
+	output = "";
+	status = -1;
+	output = shell_exec(cmd, input, status);
+	assert(status == 127);
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+}
+
+void test_filesystem()
+{
 	std::cout << "Testing file_exists() on nonexisting file...";
 	assert(file_exists("test.tmp") == false);
 	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
@@ -149,11 +191,20 @@ void test_misc()
 	std::cout << "\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 }
 
+void test_misc()
+{
+	std::cout << "Testing sleep()...";
+	assert(sleep(1) == 0);
+	std::cout << "\t\t\t\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+}
+
 int main(void)
 {
 	test_trim();
 	test_net();
 	test_base64();
+	test_process();
+	test_filesystem();
 	test_misc();
 	return 0;
 }
