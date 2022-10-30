@@ -24,7 +24,9 @@ To use, simply do:
 
 git clone https://github.com/rmarder/libramnet
 
-./configure && make && make test && make install
+cd libramnet
+
+sh configure && make && make test && sudo make install
 
 [libcurl]: <https://curl.se/libcurl/>
 [base64]: <https://github.com/ReneNyffenegger/cpp-base64>
