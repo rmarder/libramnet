@@ -244,9 +244,10 @@ std::string shell_exec(const std::string cmd)
 	return shell_exec(cmd, "");
 }
 
-/******************/
-/* math functions */
-/******************/
+/******************
+ * math functions *
+ ******************
+*/
 
 int rand(const int min /* = 0 */, const int max /* = RAND_MAX */)
 {
@@ -254,9 +255,10 @@ int rand(const int min /* = 0 */, const int max /* = RAND_MAX */)
 	return min + std::rand() / (RAND_MAX / (max - min + 1) + 1);
 }
 
-/********************/
-/* string functions */
-/********************/
+/********************
+ * string functions *
+ ********************
+*/
 
 bool is_int(const std::string &str)
 {
@@ -414,6 +416,7 @@ std::string str_replace(const std::string &search, const std::string &replace, c
 * array functions *
 *******************
 */
+
 namespace {
 
 // explode implementation helper. we don't want people caling this, thus the anonymous namespace.
