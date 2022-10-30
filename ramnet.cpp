@@ -37,6 +37,9 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 
 // this can be found in "apk add curl-dev"
 #include <curl/curl.h>
@@ -127,6 +130,118 @@ std::string __base64_encode(const std::string &str)
 std::string __base64_decode(const std::string &str)
 {
 	return base64_decode(str);
+}
+
+/*********************
+ * process functions *
+**********************
+*/
+
+struct popen2
+{
+	pid_t child_pid;
+	int from_child, to_child;
+};
+
+struct shell_exec
+{
+	int status;
+	std::string output;
+};
+
+int popen2(const char *cmdline, struct popen2 *childinfo)
+{
+	pid_t p;
+	int pipe_stdin[2], pipe_stdout[2];
+
+	if(pipe(pipe_stdin)) return -1;
+	if(pipe(pipe_stdout)) return -1;
+
+	p = fork();
+	if(p < 0) return p; /* fork failed */
+	if(p == 0)
+	{
+		/* child */
+		close(pipe_stdin[1]);
+		dup2(pipe_stdin[0], 0);
+		close(pipe_stdout[0]);
+		dup2(pipe_stdout[1], 1);
+		execl("/bin/sh", "sh", "-c", cmdline, NULL);
+		perror("execl");
+		exit(EXIT_FAILURE);
+	}
+	childinfo->child_pid = p;
+	childinfo->to_child = pipe_stdin[1];
+	childinfo->from_child = pipe_stdout[0];
+	return 0;
+}
+
+// simple wrapper around popen2()
+// ensures process terminatation after timeout seconds. timeout 0 runs forever.
+std::string shell_exec(const std::string cmd, const std::string input, int &status, int timeout)
+{
+	char buf[8192];
+	struct popen2 kid;
+	popen2(cmd.c_str(), &kid);
+	write(kid.to_child, input.c_str(), input.length());
+	close(kid.to_child);
+	memset(buf, 0, 8192);
+
+	if(timeout > 0)
+	{
+		timeout = timeout * 10;
+		for(int i = 0; i < timeout; i++)
+		{
+			if(waitpid(kid.child_pid, &status, WNOHANG) != 0)
+			{
+				// process finished before timeout.
+				break;
+			}
+			usleep(100000); // 0.1 second
+		}
+		if(waitpid(kid.child_pid, &status, WNOHANG) == 0)
+		{
+			// process still running. kill it.
+			kill(kid.child_pid, SIGTERM);
+			usleep(100000);
+			if(waitpid(kid.child_pid, &status, WNOHANG) == 0)
+			{
+				kill(kid.child_pid, SIGKILL);
+			}
+		}
+	}
+
+	// wait for and reap the child
+	waitpid(kid.child_pid, &status, 0);
+
+	// collect all of the output from child, do not block
+	fcntl(kid.from_child, F_SETFL, O_NONBLOCK);
+	read(kid.from_child, buf, 8192);
+	close(kid.from_child);
+
+	std::string output = buf;
+	status = WEXITSTATUS(status);
+
+	return output;
+}
+
+// alternative way of calling shell_exec() with fewer arguments
+std::string shell_exec(const std::string cmd, const std::string input, int &status)
+{
+	return shell_exec(cmd, input, status, 0);
+}
+
+// alternative way of calling shell_exec() with fewer arguments
+std::string shell_exec(const std::string cmd, const std::string input)
+{
+	int status;
+	return shell_exec(cmd, input, status);
+}
+
+// alternative way of calling shell_exec() with fewer arguments
+std::string shell_exec(const std::string cmd)
+{
+	return shell_exec(cmd, "");
 }
 
 /******************/
@@ -462,15 +577,10 @@ std::string url_get_contents(const std::string &input)
 	return "";
 }
 
-/******************
- * misc functions *
- ******************
+/************************
+ * filesystem functions *
+ ************************
 */
-
-unsigned int __sleep(unsigned int seconds)
-{
-	return sleep(seconds);
-}
 
 // returns true if file was successfully removed (or never existed), false otherwise
 bool __unlink(const std::string &file)
@@ -548,6 +658,16 @@ bool is_writable(const std::string &str)
 		return true;
 	}
 	return false;
+}
+
+/******************
+ * misc functions *
+ ******************
+*/
+
+unsigned int __sleep(unsigned int seconds)
+{
+	return sleep(seconds);
 }
 
 } // end of namespace
