@@ -66,6 +66,12 @@ std::string read_line(int sock);
 bool write_line(int sock, const std::string &line);
 void __close(int sock);
 
+// tls functions
+bool ssl_sopen(const std::string &hostname, int port, bool verify);
+std::string ssl_read_line();
+bool ssl_write_line(const std::string &line);
+void ssl_close();
+
 // base64 functions
 std::string __base64_decode(const std::string &str);
 std::string __base64_encode(const std::string &str);
