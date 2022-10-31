@@ -18,6 +18,8 @@ Requires [libcurl] built with HTTP support against an ssl/tls library such as Op
 
 Requires [base64] base64 encoding and decoding with c++, which is bundled in this project.
 
+Requires [libtls] libtls, we test against libretls for openssl
+
 I develop and test with GCC/G++ and Linux, YMMV on other platforms.
 
 To use, simply do:
@@ -30,3 +32,4 @@ sh configure && make && make test && sudo make install
 
 [libcurl]: <https://curl.se/libcurl/>
 [base64]: <https://github.com/ReneNyffenegger/cpp-base64>
+[libtls]: <https://git.causal.agency/libretls/>
