@@ -74,13 +74,31 @@ void test_net()
 	std::cout << "\t\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 
 	std::cout << "Testing write_line() on www.example.com port 80...";
-	assert(write_line(sock, "HEAD / HTTP/1.0\r\nHost: www.example.com\r\n\r\n") != false);
+	assert(write_line(sock, "HEAD / HTTP/1.0\r\nHost: www.example.com\r\n") != false);
 	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 
 	std::cout << "Testing read_line() on www.example.com port 80...";
 	assert(read_line(sock) == "HTTP/1.0 200 OK");
 	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
 	close(sock);
+}
+
+void test_tls()
+{
+	int sock = -1;
+	std::cout << "Testing ssl_sopen() on www.example.com port 443...";
+	sock = ssl_sopen("www.example.com", 443, true);
+	assert(sock != -1);
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing ssl_write_line() on www.example.com port 443...";
+	assert(ssl_write_line("HEAD / HTTP/1.0\r\nHost: www.example.com\r\n") != false);
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+
+	std::cout << "Testing ssl_read_line() on www.example.com port 443...";
+	assert(ssl_read_line() == "HTTP/1.0 200 OK");
+	std::cout << "\t\t[\033[1;32mPASSED\033[0m]" << std::endl;
+	ssl_close();
 }
 
 void test_base64()
@@ -217,6 +235,7 @@ int main(void)
 {
 	test_trim();
 	test_net();
+	test_tls();
 	test_base64();
 	test_process();
 	test_filesystem();
