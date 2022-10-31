@@ -1,11 +1,11 @@
 
 libramnet: ramnet.o
-	c++ -Os -std=c++11 -Wall -fPIC -lcurl -shared -o libramnet.so ramnet.o
+	c++ -Os -std=c++11 -Wall -fPIC -lcurl -ltls -shared -o libramnet.so ramnet.o
 ramnet.o: ramnet.cpp ramnet.hpp
-	c++ -Os -std=c++11 -Wall -fPIC -lcurl -c ramnet.cpp -o ramnet.o
+	c++ -Os -std=c++11 -Wall -fPIC -lcurl -ltls -c ramnet.cpp -o ramnet.o
 
 test: libramnet.so test.o
-	c++ -Os test.o -std=c++11 -Wall -L. -lramnet -lcurl -o test -Wl,-rpath,.
+	c++ -Os test.o -std=c++11 -Wall -L. -lramnet -lcurl -ltls -o test -Wl,-rpath,.
 	./test || (echo "[\033[1;31mTEST SUITE FAILED\033[0m]"; sh -c 'exit 1')
 	rm -v test test.o
 test.o: test.cpp
