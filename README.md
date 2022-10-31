@@ -8,7 +8,7 @@ This is a procedural C-style library. There are no classes or objects here.
 
 This library is not thread safe. You have been warned.
 
-See the source code for function prototypes and usage.
+See the source code for function prototypes and usage. test.cpp contains example usage of everything.
 
 Requires at least a C++11 compiler or better to build.
 
