@@ -44,6 +44,10 @@
 // this can be found in "apk add curl-dev"
 #include <curl/curl.h>
 
+// this comes from either LibreSSL or the LibreTLS libtls for OpenSSL project.
+// the latter can be found in "apk add libretls-dev"
+#include <tls.h>
+
 // this is deliberate, we want to build base64.cpp and base64.h directly into libramnet
 #include "base64.cpp"
 
@@ -681,6 +685,146 @@ bool write_line(int sock, const std::string &line)
 void __close(int sock)
 {
 	close(sock);
+}
+
+/*****************
+ * TLS functions *
+ *****************
+*/
+
+// because this is here, it means libramnet can only handle one active tls connection at a time using these functions
+// eventually we should fix this problem.
+struct tls_config *tlscfg = NULL;
+struct tls *tlsctx = NULL;
+int tlssock;
+
+// open a tls connection to hostname on port
+// set verify false to disable all tls validation and certificate checking
+// returns true on success or false on failure
+bool ssl_sopen(const std::string &hostname, int port, bool verify)
+{
+	tlssock = sopen(hostname, port);
+	if(tlssock == -1)
+	{
+		std::cerr << "error opening socket for ssl." << std::endl;
+		return false;
+	}
+	tlscfg = NULL;
+	tlsctx = NULL;
+	if(tls_init() != 0)
+	{
+		std::cerr << "tls_init() failed!" << std::endl;
+		return false;
+	}
+	if((tlscfg = tls_config_new()) == NULL)
+	{
+		std::cerr << "tls_config_new() failed!" << std::endl;
+		return false;
+	}
+	if((tlsctx = tls_client()) == NULL)
+	{
+		std::cerr << "tls_client() failed!" << std::endl;
+		return false;
+	}
+	if(tls_configure(tlsctx, tlscfg) != 0)
+	{
+		std::cerr << "tls_configure(): " << tls_error(tlsctx) << std::endl;
+		return false;
+	}
+	if(verify == false)
+	{
+		// disable certificate & oscp validation
+		tls_config_insecure_noverifycert(tlscfg);
+
+		// disable server name validation
+		tls_config_insecure_noverifyname(tlscfg);
+
+		// disable checking certificate expiration
+		tls_config_insecure_noverifytime(tlscfg);
+	}
+	// if(tls_connect(tlsctx, hostname.c_str(), std::to_string(port).c_str()) != 0)
+	if(tls_connect_socket(tlsctx, tlssock, hostname.c_str()) != 0)
+	{
+		std::cerr << "tls_connect(): " << tls_error(tlsctx) << std::endl;
+		return false;
+	}
+	if(tls_handshake(tlsctx) != 0)
+	{
+		std::cerr << "tls_handshake(): " << tls_error(tlsctx) << std::endl;
+		return false;
+	}
+	return true;
+}
+
+// read a line from tls socket and return it.
+std::string ssl_read_line()
+{
+	char tmp[1];
+	char buf[8192];
+	ssize_t state;
+	int i = 0;
+
+	while(i < 8192)
+	{
+		state = tls_read(tlsctx, tmp, 1);
+		if(state == -1)
+		{
+			std::cerr << "socket failure. read failed." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		if(state == TLS_WANT_POLLIN)
+		{
+			usleep(100000);
+			continue;
+		}
+		if(state != 1)
+		{
+			std::cerr << "tls_read() failure." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		buf[i] = tmp[0];
+		if(tmp[0] == '\n' || tmp[0] == '\r')
+		{
+			// do not break if the first byte we read is a newline character.
+			// this prevents returning an empty string for no good reason.
+			if(i > 0)
+			{
+				buf[i] = '\0';
+				break;
+			}
+		}
+		i++;
+	}
+	std::string result = buf;
+	return trim(result);
+}
+
+// returns true on success, false on failure
+bool ssl_write_line(const std::string &line)
+{
+	if(tls_write(tlsctx, line.c_str(), line.length()) != (ssize_t)line.length())
+	{
+		std::cerr << "ssl socket failure. write failed." << std::endl;
+		return false;
+	}
+	if(tls_write(tlsctx, "\r\n", 2) != 2)
+	{
+		std::cerr << "ssl socket failure. write failed." << std::endl;
+		return false;
+	}
+	return true;
+}
+
+void ssl_close()
+{
+	if(tls_close(tlsctx) != 0)
+	{
+		std::cerr << "tls_close(): " << tls_error(tlsctx) << std::endl;
+	}
+	tls_free(tlsctx);
+	tls_config_free(tlscfg);
+	close(tlssock);
 }
 
 /************************
