@@ -29,6 +29,7 @@
 #include <cctype>
 #include <climits>
 #include <vector>
+#include <map>
 #include <sstream>
 #include <utility>
 #include <cstdlib>
@@ -692,81 +693,93 @@ void __close(int sock)
  *****************
 */
 
-// because this is here, it means libramnet can only handle one active tls connection at a time using these functions
-// eventually we should fix this problem.
-struct tls_config *tlscfg = NULL;
-struct tls *tlsctx = NULL;
-int tlssock;
+// this keeps a mapping of tls sockets to the tls session state
+// which allows the external api for this to be the same as for the non-ssl function versions
+// this also properly handles having multiple ssl sockets open at the same time
+
+// pack the tls structs into a common struct
+struct sslstruct {
+	struct tls_config *tlscfg = NULL;
+	struct tls *tlsctx = NULL;
+};
+
+// create a mapping between the tls sockets and our common ssl struct
+std::map<int, struct sslstruct> sslmap;
 
 // open a tls connection to hostname on port
 // set verify false to disable all tls validation and certificate checking
 // returns true on success or false on failure
-bool ssl_sopen(const std::string &hostname, int port, bool verify)
+int ssl_sopen(const std::string &hostname, int port, bool verify)
 {
-	tlssock = sopen(hostname, port);
+	int tlssock = sopen(hostname, port);
 	if(tlssock == -1)
 	{
 		std::cerr << "error opening socket for ssl." << std::endl;
-		return false;
+		return -1;
 	}
-	tlscfg = NULL;
-	tlsctx = NULL;
+	struct sslstruct ssl;
+	ssl.tlscfg = NULL;
+	ssl.tlsctx = NULL;
 	if(tls_init() != 0)
 	{
 		std::cerr << "tls_init() failed!" << std::endl;
-		return false;
+		return -1;
 	}
-	if((tlscfg = tls_config_new()) == NULL)
+	if((ssl.tlscfg = tls_config_new()) == NULL)
 	{
 		std::cerr << "tls_config_new() failed!" << std::endl;
-		return false;
+		return -1;
 	}
-	if((tlsctx = tls_client()) == NULL)
+	if((ssl.tlsctx = tls_client()) == NULL)
 	{
 		std::cerr << "tls_client() failed!" << std::endl;
-		return false;
+		return -1;
 	}
-	if(tls_configure(tlsctx, tlscfg) != 0)
+	if(tls_configure(ssl.tlsctx, ssl.tlscfg) != 0)
 	{
-		std::cerr << "tls_configure(): " << tls_error(tlsctx) << std::endl;
-		return false;
+		std::cerr << "tls_configure(): " << tls_error(ssl.tlsctx) << std::endl;
+		return -1;
 	}
 	if(verify == false)
 	{
 		// disable certificate & oscp validation
-		tls_config_insecure_noverifycert(tlscfg);
+		tls_config_insecure_noverifycert(ssl.tlscfg);
 
 		// disable server name validation
-		tls_config_insecure_noverifyname(tlscfg);
+		tls_config_insecure_noverifyname(ssl.tlscfg);
 
 		// disable checking certificate expiration
-		tls_config_insecure_noverifytime(tlscfg);
+		tls_config_insecure_noverifytime(ssl.tlscfg);
 	}
 	// if(tls_connect(tlsctx, hostname.c_str(), std::to_string(port).c_str()) != 0)
-	if(tls_connect_socket(tlsctx, tlssock, hostname.c_str()) != 0)
+	if(tls_connect_socket(ssl.tlsctx, tlssock, hostname.c_str()) != 0)
 	{
-		std::cerr << "tls_connect(): " << tls_error(tlsctx) << std::endl;
-		return false;
+		std::cerr << "tls_connect(): " << tls_error(ssl.tlsctx) << std::endl;
+		return -1;
 	}
-	if(tls_handshake(tlsctx) != 0)
+	if(tls_handshake(ssl.tlsctx) != 0)
 	{
-		std::cerr << "tls_handshake(): " << tls_error(tlsctx) << std::endl;
-		return false;
+		std::cerr << "tls_handshake(): " << tls_error(ssl.tlsctx) << std::endl;
+		return -1;
 	}
-	return true;
+	sslmap[tlssock] = ssl;
+	return tlssock;
 }
 
 // read a line from tls socket and return it.
-std::string ssl_read_line()
+std::string ssl_read_line(int tlssock)
 {
 	char tmp[1];
 	char buf[8192];
 	ssize_t state;
 	int i = 0;
 
+	struct sslstruct ssl;
+	ssl = sslmap[tlssock];
+
 	while(i < 8192)
 	{
-		state = tls_read(tlsctx, tmp, 1);
+		state = tls_read(ssl.tlsctx, tmp, 1);
 		if(state == -1)
 		{
 			std::cerr << "socket failure. read failed." << std::endl;
@@ -801,14 +814,17 @@ std::string ssl_read_line()
 }
 
 // returns true on success, false on failure
-bool ssl_write_line(const std::string &line)
+bool ssl_write_line(int tlssock, const std::string &line)
 {
-	if(tls_write(tlsctx, line.c_str(), line.length()) != (ssize_t)line.length())
+	struct sslstruct ssl;
+	ssl = sslmap[tlssock];
+
+	if(tls_write(ssl.tlsctx, line.c_str(), line.length()) != (ssize_t)line.length())
 	{
 		std::cerr << "ssl socket failure. write failed." << std::endl;
 		return false;
 	}
-	if(tls_write(tlsctx, "\r\n", 2) != 2)
+	if(tls_write(ssl.tlsctx, "\r\n", 2) != 2)
 	{
 		std::cerr << "ssl socket failure. write failed." << std::endl;
 		return false;
@@ -816,14 +832,18 @@ bool ssl_write_line(const std::string &line)
 	return true;
 }
 
-void ssl_close()
+void ssl_close(int tlssock)
 {
-	if(tls_close(tlsctx) != 0)
+	struct sslstruct ssl;
+	ssl = sslmap[tlssock];
+
+	if(tls_close(ssl.tlsctx) != 0)
 	{
-		std::cerr << "tls_close(): " << tls_error(tlsctx) << std::endl;
+		std::cerr << "tls_close(): " << tls_error(ssl.tlsctx) << std::endl;
 	}
-	tls_free(tlsctx);
-	tls_config_free(tlscfg);
+	tls_free(ssl.tlsctx);
+	tls_config_free(ssl.tlscfg);
+	sslmap.erase(tlssock);
 	close(tlssock);
 }
 
