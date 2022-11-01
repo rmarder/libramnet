@@ -397,16 +397,32 @@ std::string str_pad(const std::string &input, size_t length, const std::string p
 	return result;
 }
 
-std::string ucfirst(std::string str)
+std::string ucfirst(const std::string &str)
 {
-	str[0]=toupper(str[0]);
-	return str;
+	std::string result = str;
+	result[0]=toupper(result[0]);
+	return result;
 }
 
-std::string lcfirst(std::string str)
+std::string lcfirst(const std::string &str)
 {
-	str[0]=tolower(str[0]);
-	return str;
+	std::string result = str;
+	result[0]=tolower(result[0]);
+	return result;
+}
+
+std::string strtoupper(const std::string &str)
+{
+	std::string result = str;
+	std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c){ return std::toupper(c); });
+	return result;
+}
+
+std::string strtolower(const std::string &str)
+{
+	std::string result = str;
+	std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c){ return std::tolower(c); });
+	return result;
 }
 
 // this depends on array behavior, so it's down here
