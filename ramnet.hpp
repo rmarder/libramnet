@@ -49,8 +49,10 @@ std::string strrev(std::string str);
 std::string str_rot13(const std::string &str);
 std::string str_repeat(const std::string &str, const size_t times);
 std::string str_pad(const std::string &input, size_t length, const std::string pad_str = " ", size_t pad_type = STR_PAD_RIGHT);
-std::string ucfirst(std::string str);
-std::string lcfirst(std::string str);
+std::string ucfirst(const std::string &str);
+std::string lcfirst(const std::string &str);
+std::string strtoupper(const std::string &str);
+std::string strtolower(const std::string &str);
 std::string str_replace(const std::string &search, const std::string &replace, const std::string &subject);
 
 // array functions
